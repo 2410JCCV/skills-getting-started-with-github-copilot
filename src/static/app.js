@@ -28,26 +28,47 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         // Participants section (added, en español)
-        const participantsHeader = document.createElement("h5");
-        participantsHeader.textContent = "Participantes";
+        // Header with title + badge count
+        const participantsHeader = document.createElement("div");
         participantsHeader.className = "participants-header";
+        participantsHeader.setAttribute("role", "group");
+        participantsHeader.setAttribute("aria-label", `Participantes de ${name}`);
 
-        // add count next to header
-        const countSpan = document.createElement("span");
-        countSpan.className = "participants-count";
-        countSpan.textContent = ` (${Array.isArray(details.participants) ? details.participants.length : 0})`;
-        participantsHeader.appendChild(countSpan);
+        const headerTitle = document.createElement("h5");
+        headerTitle.textContent = "Participantes";
+        headerTitle.style.margin = "0";
 
+        const badge = document.createElement("span");
+        badge.className = "participants-badge";
+        const count = Array.isArray(details.participants) ? details.participants.length : 0;
+        badge.textContent = count;
+
+        participantsHeader.appendChild(headerTitle);
+        participantsHeader.appendChild(badge);
+
+        // Participants list (bulleted)
         const participantsList = document.createElement("ul");
         participantsList.className = "participants-list";
-        participantsList.setAttribute("aria-label", `Participantes de ${name}`);
 
-        if (Array.isArray(details.participants) && details.participants.length > 0) {
+        if (count > 0) {
           details.participants.forEach((p) => {
             const li = document.createElement("li");
             li.className = "participant-item";
-            // If participant object has a name/email field, adjust accordingly.
-            li.textContent = typeof p === "string" ? p : p.name || p.email || JSON.stringify(p);
+
+            // avatar with initial
+            const raw = typeof p === "string" ? p : p.name || p.email || String(p);
+            const initial = raw.trim().charAt(0).toUpperCase() || "?";
+            const avatar = document.createElement("span");
+            avatar.className = "participant-avatar";
+            avatar.setAttribute("aria-hidden", "true");
+            avatar.textContent = initial;
+
+            const content = document.createElement("span");
+            content.className = "participant-content";
+            content.textContent = raw;
+
+            li.appendChild(avatar);
+            li.appendChild(content);
             participantsList.appendChild(li);
           });
         } else {
