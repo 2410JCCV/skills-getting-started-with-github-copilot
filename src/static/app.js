@@ -18,36 +18,61 @@ document.addEventListener("DOMContentLoaded", () => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
 
-        const spotsLeft = details.max_participants - details.participants.length;
+        const spotsLeft = details.max_participants - (Array.isArray(details.participants) ? details.participants.length : 0);
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Horario:</strong> ${details.schedule}</p>
-          <p><strong>Disponibilidad:</strong> ${spotsLeft} plazas disponibles</p>
+        // Header area
+        const headerDiv = document.createElement("div");
+        headerDiv.className = "activity-header";
+        headerDiv.innerHTML = `
+          <div class="activity-title">
+            <h4>${name}</h4>
+            <span class="spots-left" aria-hidden="true">${spotsLeft} plazas</span>
+          </div>
+          <p class="activity-desc">${details.description}</p>
+          <p class="activity-schedule"><strong>Horario:</strong> ${details.schedule}</p>
         `;
 
-        // Participants section (added, en español)
-        const participantsHeader = document.createElement("h5");
-        participantsHeader.textContent = "Participantes";
-        participantsHeader.className = "participants-header";
+        activityCard.appendChild(headerDiv);
 
-        // add count next to header
+        // Participants section (sempre visible)
+        const participantsSection = document.createElement("section");
+        participantsSection.className = "participants-section";
+        participantsSection.setAttribute("aria-labelledby", `participants-${cssEscape(name)}-label`);
+
+        // Header with count badge
+        const participantsHeader = document.createElement("div");
+        participantsHeader.className = "participants-header";
+        const headerH5 = document.createElement("h5");
+        headerH5.id = `participants-${cssEscape(name)}-label`;
+        headerH5.textContent = "Participantes";
+        headerH5.className = "participants-title";
+
         const countSpan = document.createElement("span");
-        countSpan.className = "participants-count";
-        countSpan.textContent = ` (${Array.isArray(details.participants) ? details.participants.length : 0})`;
+        countSpan.className = "participants-count badge";
+        const count = Array.isArray(details.participants) ? details.participants.length : 0;
+        countSpan.textContent = `${count}`;
+
+        participantsHeader.appendChild(headerH5);
         participantsHeader.appendChild(countSpan);
 
+        // Participants list (ul with bullets)
         const participantsList = document.createElement("ul");
         participantsList.className = "participants-list";
+        participantsList.setAttribute("role", "list");
         participantsList.setAttribute("aria-label", `Participantes de ${name}`);
 
         if (Array.isArray(details.participants) && details.participants.length > 0) {
           details.participants.forEach((p) => {
             const li = document.createElement("li");
             li.className = "participant-item";
-            // If participant object has a name/email field, adjust accordingly.
-            li.textContent = typeof p === "string" ? p : p.name || p.email || JSON.stringify(p);
+            // Support a string or an object { name, email }
+            if (typeof p === "string") {
+              li.textContent = p;
+            } else if (p && typeof p === "object") {
+              li.textContent = p.name || p.email || JSON.stringify(p);
+            } else {
+              li.textContent = String(p);
+            }
             participantsList.appendChild(li);
           });
         } else {
@@ -57,8 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
           participantsList.appendChild(li);
         }
 
-        activityCard.appendChild(participantsHeader);
-        activityCard.appendChild(participantsList);
+        participantsSection.appendChild(participantsHeader);
+        participantsSection.appendChild(participantsList);
+
+        activityCard.appendChild(participantsSection);
 
         activitiesList.appendChild(activityCard);
 
@@ -76,12 +103,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Helper: CSS-safe id (very small escape to avoid spaces/quotes)
+  function cssEscape(str) {
+    return String(str).replace(/[^a-zA-Z0-9_-]/g, "-");
+  }
+
   // Handle form submission
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const activity = document.getElementById("activity").value;
+
+    if (!email || !activity) {
+      showMessage("Completa el email y selecciona una actividad.", "error");
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -94,29 +131,33 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (response.ok) {
-        messageDiv.textContent = result.message;
-        messageDiv.className = "message success";
+        showMessage(result.message || "Inscripción realizada.", "success");
         signupForm.reset();
         // refresh list to show new participant
         fetchActivities();
       } else {
-        messageDiv.textContent = result.detail || "Ocurrió un error";
-        messageDiv.className = "message error";
+        showMessage(result.detail || result.message || "Ocurrió un error", "error");
       }
-
-      messageDiv.classList.remove("hidden");
-
-      // Hide message after 5 seconds
-      setTimeout(() => {
-        messageDiv.classList.add("hidden");
-      }, 5000);
     } catch (error) {
-      messageDiv.textContent = "No se pudo completar la inscripción. Inténtalo de nuevo.";
-      messageDiv.className = "message error";
-      messageDiv.classList.remove("hidden");
+      showMessage("No se pudo completar la inscripción. Inténtalo de nuevo.", "error");
       console.error("Error signing up:", error);
     }
   });
+
+  // Utility to show messages
+  function showMessage(text, type = "info") {
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${type}`;
+    messageDiv.classList.remove("hidden");
+    messageDiv.setAttribute("role", "status");
+    messageDiv.setAttribute("aria-live", "polite");
+
+    // Hide message after 5 seconds
+    clearTimeout(showMessage._timeout);
+    showMessage._timeout = setTimeout(() => {
+      messageDiv.classList.add("hidden");
+    }, 5000);
+  }
 
   // Initialize app
   fetchActivities();

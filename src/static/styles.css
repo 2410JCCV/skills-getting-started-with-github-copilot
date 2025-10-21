@@ -57,39 +57,78 @@ section h3 {
   color: #1a237e;
 }
 
+/* Activity card */
 .activity-card {
   margin-bottom: 15px;
   padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  box-shadow: 0 4px 10px rgba(10, 20, 60, 0.03);
+}
+
+.activity-header .activity-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .activity-card h4 {
-  margin-bottom: 10px;
-  color: #0066cc;
+  margin-bottom: 6px;
+  color: #0b63b5;
+  font-size: 18px;
 }
 
-.activity-card p {
-  margin-bottom: 8px;
+.spots-left {
+  font-size: 13px;
+  color: #374151;
+  background: #eef2ff;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #dbeafe;
 }
 
-/* Participants styles (added) */
+/* description and schedule */
+.activity-desc {
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.activity-schedule {
+  margin-bottom: 12px;
+  color: #4b5563;
+}
+
+/* Participants styles (prettified) */
+.participants-section {
+  margin-top: 8px;
+}
+
 .participants-header {
-  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.participants-title {
   font-size: 14px;
   color: #1a237e;
-  border-bottom: 1px dashed #e0e7ff;
-  padding-bottom: 6px;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
+  font-weight: 600;
 }
 
-.participants-count {
+.badge.participants-count {
+  display: inline-block;
+  min-width: 28px;
+  text-align: center;
+  background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+  border: 1px solid #c7d2fe;
+  color: #1f2937;
+  padding: 4px 8px;
+  border-radius: 999px;
   font-size: 13px;
-  color: #555;
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.03);
 }
 
 /* Mostrar como lista con viñetas dentro de los elementos agradables */
@@ -97,10 +136,11 @@ section h3 {
   list-style: disc;
   list-style-position: inside;
   margin-top: 8px;
-  padding-left: 0;
+  padding-left: 12px;
   display: block;
 }
 
+/* Item de participante */
 .participant-item {
   padding: 8px 10px;
   background: linear-gradient(180deg, #eef6ff 0%, #fbfdff 100%);
@@ -110,10 +150,10 @@ section h3 {
   font-size: 14px;
   margin-bottom: 8px;
   box-shadow: 0 1px 0 rgba(7,55,99,0.04);
-  /* Mantener la viñeta visible */
   list-style-position: inside;
 }
 
+/* Sin participantes */
 .participant-empty {
   color: #666;
   font-style: italic;
@@ -122,6 +162,7 @@ section h3 {
   border: none;
 }
 
+/* Form styles */
 .form-group {
   margin-bottom: 15px;
 }
