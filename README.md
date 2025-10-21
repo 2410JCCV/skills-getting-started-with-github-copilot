@@ -14,3 +14,31 @@ Remember, it's self-paced so feel free to take a break! ☕️
 
 &copy; 2025 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
 
+## Ejecutar la aplicación localmente
+
+1. Crear e activar un entorno virtual (opcional pero recomendado):
+
+	```bash
+	python -m venv .venv
+	source .venv/bin/activate
+	```
+
+2. Instalar dependencias:
+
+	```bash
+	pip install -r requirements.txt
+	```
+
+3. Iniciar la aplicación con uvicorn:
+
+	```bash
+	python -m uvicorn src.app:app --host 127.0.0.1 --port 8000 --reload
+	```
+
+4. Abrir en el navegador:
+
+	- Aplicación: http://127.0.0.1:8000/
+	- Documentación automática (Swagger): http://127.0.0.1:8000/docs
+
+Nota: Este ejercicio no incluye tests automatizados en el repositorio; puedes explorar la app manualmente usando las rutas anteriores.
+
