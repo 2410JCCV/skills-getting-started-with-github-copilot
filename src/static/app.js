@@ -23,30 +23,37 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <p><strong>Horario:</strong> ${details.schedule}</p>
+          <p><strong>Disponibilidad:</strong> ${spotsLeft} plazas disponibles</p>
         `;
 
-        // Participants section (added)
+        // Participants section (added, en español)
         const participantsHeader = document.createElement("h5");
-        participantsHeader.textContent = "Participants";
+        participantsHeader.textContent = "Participantes";
         participantsHeader.className = "participants-header";
+
+        // add count next to header
+        const countSpan = document.createElement("span");
+        countSpan.className = "participants-count";
+        countSpan.textContent = ` (${Array.isArray(details.participants) ? details.participants.length : 0})`;
+        participantsHeader.appendChild(countSpan);
 
         const participantsList = document.createElement("ul");
         participantsList.className = "participants-list";
+        participantsList.setAttribute("aria-label", `Participantes de ${name}`);
 
         if (Array.isArray(details.participants) && details.participants.length > 0) {
           details.participants.forEach((p) => {
             const li = document.createElement("li");
             li.className = "participant-item";
             // If participant object has a name/email field, adjust accordingly.
-            li.textContent = typeof p === "string" ? p : p.email || p.name || JSON.stringify(p);
+            li.textContent = typeof p === "string" ? p : p.name || p.email || JSON.stringify(p);
             participantsList.appendChild(li);
           });
         } else {
           const li = document.createElement("li");
           li.className = "participant-empty";
-          li.textContent = "No participants yet";
+          li.textContent = "Sin participantes por ahora";
           participantsList.appendChild(li);
         }
 
@@ -55,14 +62,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         activitiesList.appendChild(activityCard);
 
-        // Add option to select dropdown
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        activitySelect.appendChild(option);
+        // Add option to select dropdown (avoid duplicates)
+        if (!Array.from(activitySelect.options).some(o => o.value === name)) {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          activitySelect.appendChild(option);
+        }
       });
     } catch (error) {
-      activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
+      activitiesList.innerHTML = "<p>No se pudieron cargar las actividades. Inténtalo más tarde.</p>";
       console.error("Error fetching activities:", error);
     }
   }
@@ -86,11 +95,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         messageDiv.textContent = result.message;
-        messageDiv.className = "success";
+        messageDiv.className = "message success";
         signupForm.reset();
+        // refresh list to show new participant
+        fetchActivities();
       } else {
-        messageDiv.textContent = result.detail || "An error occurred";
-        messageDiv.className = "error";
+        messageDiv.textContent = result.detail || "Ocurrió un error";
+        messageDiv.className = "message error";
       }
 
       messageDiv.classList.remove("hidden");
@@ -100,8 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.classList.add("hidden");
       }, 5000);
     } catch (error) {
-      messageDiv.textContent = "Failed to sign up. Please try again.";
-      messageDiv.className = "error";
+      messageDiv.textContent = "No se pudo completar la inscripción. Inténtalo de nuevo.";
+      messageDiv.className = "message error";
       messageDiv.classList.remove("hidden");
       console.error("Error signing up:", error);
     }
